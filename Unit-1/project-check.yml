@@ -1,0 +1,16 @@
+name: Project document checks
+on:
+  push:
+  pull_request:
+jobs:
+  check-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required documents
+        run: |
+          test -f README.md
+          test -f docs/01-business-problem.md
+          test -f docs/02-product-vision-mvp.md
+          test -f docs/03-design-thinking.md
+          test -f docs/06-functional-requirements.md

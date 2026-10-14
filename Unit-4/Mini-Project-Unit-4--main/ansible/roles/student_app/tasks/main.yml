@@ -1,0 +1,58 @@
+---
+- name: Create application and data directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0777'
+  loop:
+    - "{{ app_dir }}"
+    - "{{ host_data_dir }}"
+
+- name: Synchronize application files to remote host
+  copy:
+    src: "{{ playbook_dir }}/../app/"
+    dest: "{{ app_dir }}/"
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+
+- name: Build Docker image on remote host
+  community.docker.docker_image:
+    name: student-academic-app
+    tag: latest
+    build:
+      path: "{{ app_dir }}"
+    source: build
+    state: present
+
+- name: Deploy and run Student Academic Platform container
+  community.docker.docker_container:
+    name: student-academic-app
+    image: student-academic-app:latest
+    state: started
+    restart_policy: always
+    recreate: yes
+    published_ports:
+      - "5000:5000"
+    volumes:
+      - "{{ host_data_dir }}:/app/data"
+    env:
+      PORT: "5000"
+      DATABASE_PATH: "/app/data/student_records.db"
+
+- name: Wait for application container to become healthy
+  uri:
+    url: "http://127.0.0.1:5000/api/health"
+    method: GET
+    status_code: 200
+    return_content: yes
+  register: health_result
+  retries: 10
+  delay: 3
+  until: health_result.status == 200 and 'UP' in health_result.content
+
+- name: Output Application Health Status
+  debug:
+    msg: "Application is healthy! Status: {{ health_result.json.status }}"

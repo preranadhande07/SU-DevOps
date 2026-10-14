@@ -1,0 +1,17 @@
+---
+- name: Deploy Student Record and Academic Management Platform
+  hosts: academic_servers
+  become: true
+  gather_facts: true
+
+  vars:
+    app_name: student-academic-app
+    app_port: 5000
+    host_data_dir: /opt/student_platform/data
+    app_dir: /opt/student_platform
+
+  roles:
+    - role: common
+    - role: docker
+    - role: nginx
+    - role: student_app

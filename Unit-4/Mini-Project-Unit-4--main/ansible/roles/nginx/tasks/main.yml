@@ -1,0 +1,33 @@
+---
+- name: Install Nginx web server
+  apt:
+    name: nginx
+    state: present
+
+- name: Remove default Nginx site configuration
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+
+- name: Deploy Student Platform reverse proxy site configuration
+  template:
+    src: student_platform.conf.j2
+    dest: /etc/nginx/sites-available/student_platform.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload nginx
+
+- name: Enable Student Platform site configuration
+  file:
+    src: /etc/nginx/sites-available/student_platform.conf
+    dest: /etc/nginx/sites-enabled/student_platform.conf
+    state: link
+  notify: reload nginx
+
+- name: Ensure Nginx service is enabled and running
+  systemd:
+    name: nginx
+    state: started
+    enabled: yes

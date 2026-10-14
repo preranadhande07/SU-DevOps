@@ -1,0 +1,37 @@
+---
+- name: Update APT repository cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install baseline system utilities
+  apt:
+    name:
+      - curl
+      - wget
+      - git
+      - jq
+      - unzip
+      - ufw
+      - ca-certificates
+      - gnupg
+      - software-properties-common
+      - python3-pip
+      - python3-venv
+    state: present
+
+- name: Configure UFW firewall rules for SSH, HTTP, and direct app port
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - "22"
+    - "80"
+    - "5000"
+    - "8080"
+
+- name: Ensure UFW is enabled and active
+  ufw:
+    state: enabled
+    policy: allow

@@ -1,0 +1,9 @@
+# Sample variables for Student Record Platform
+aws_region       = "us-east-1"
+project_name     = "student-academic-platform"
+environment      = "production"
+vpc_cidr         = "10.1.0.0/16"
+public_subnet_cidr = "10.1.1.0/24"
+instance_type    = "t2.micro"
+key_name         = "student-aws-key"
+root_volume_size = 20
